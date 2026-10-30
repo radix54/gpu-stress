@@ -1,4 +1,4 @@
-<a href="https://github.com/ozneroL541/gpu-stress/blob/master/LICENSE"><img src="https://img.shields.io/github/license/ozneroL541/gpu-stress?color=2b9348" alt="License"/></a>
+<a href="https://github.com/radix54/gpu-stress/blob/master/LICENSE"><img src="https://img.shields.io/github/license/radix54/gpu-stress?color=2b9348" alt="License"/></a>
 
 # GPU_Stress
 A program to stress NVIDIA GPU as much as possible using CUDA.
@@ -13,12 +13,12 @@ A program to stress NVIDIA GPU as much as possible using CUDA.
  - [License](#license)
 
 ## Description
-This program is based on the simulation program [Perfect_Numbers](#https://github.com/ozneroL541/perfect-numbers.git).
+This program is based on the simulation program [Perfect_Numbers](#https://github.com/radix54/perfect-numbers.git).
 
 ## Download
 Download the source code from Github
 
-    git clone https://github.com/ozneroL541/gpu-stress.git
+    git clone https://github.com/radix54/gpu-stress.git
 
 ## Compilation
 ### Requirements
@@ -46,7 +46,7 @@ To document this software use:
     doxygen docfile
 
 ## Author
-- Radice Lorenzo @ozneroL541
+- Radice Lorenzo @radix54
 
 ## License
 GPU_Stress is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
