@@ -1,0 +1,93 @@
+name: Compilation
+
+on:
+  release:
+    types: [created]
+
+permissions:
+  contents: write
+
+jobs:
+  build_linux:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    
+    - name: Checkout
+      uses: actions/checkout@v7
+    
+    - name: Install CUDA Toolkit
+      run: |
+        sudo apt update
+        sudo apt install -y gnupg wget
+        wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin
+        sudo mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600
+        wget https://developer.download.nvidia.com/compute/cuda/12.2.0/local_installers/cuda-repo-ubuntu2004-12-2-local_12.2.105-535.54.03-1_amd64.deb
+        sudo dpkg -i cuda-repo-ubuntu2004-12-2-local_12.2.105-535.54.03-1_amd64.deb
+        sudo cp /var/cuda-repo-ubuntu2004-12-2-local/cuda-*-keyring.gpg /usr/share/keyrings/
+        sudo apt update
+        sudo apt install -y cuda
+
+    - name: Install Intel C Compiler
+      run: |
+        sudo apt update
+        sudo apt install -y gnupg wget
+        wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | gpg --dearmor | sudo tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
+        echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
+        sudo apt update
+        sudo apt install -y intel-oneapi-compiler-dpcpp-cpp
+
+    - name: Setup Environment
+      run: source /opt/intel/oneapi/setvars.sh
+    
+    - name: Compile
+      run: make
+        
+    - name: Export Artifacts
+      uses: actions/upload-artifact@v7
+      with:
+        name: gpu_stress-linux
+        path: bin/*
+
+    - name: Attach executable to release
+      run: |
+        cp bin/gpu_stress bin/gpu_stress-linux
+        gh release upload "${{ github.event.release.tag_name }}" bin/gpu_stress-linux --clobber
+      env:
+        GH_TOKEN: ${{ github.token }}
+
+  build_windows:
+    runs-on: windows-latest
+
+    steps:
+    
+    - name: Checkout
+      uses: actions/checkout@v7
+
+    - name: Install CUDA Toolkit
+      run: |
+        choco install -y cuda
+
+    - name: Compile
+      run: make
+    
+    - name: Export Artifacts
+      uses: actions/upload-artifact@v7
+      with:
+        name: gpu_stress-windows
+        path: bin\*
+
+    - name: Attach executable to release
+      shell: pwsh
+      run: |
+        $executable = Get-ChildItem bin\gpu_stress* -File |
+          Where-Object { $_.Name -notlike '*-windows.exe' } |
+          Select-Object -First 1
+        if ($null -eq $executable) {
+          throw 'The Windows executable was not produced.'
+        }
+        Copy-Item $executable.FullName bin\gpu_stress-windows.exe
+        gh release upload "${{ github.event.release.tag_name }}" bin\gpu_stress-windows.exe --clobber
+      env:
+        GH_TOKEN: ${{ github.token }}
